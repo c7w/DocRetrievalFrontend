@@ -1,24 +1,16 @@
-import logo from './logo.svg';
+import { Provider, useSelector } from 'react-redux';
 import './App.css';
+import SearchBox from './SearchBox/SearchBox';
+import ResultBox from './ResultBox/ResultBox';
+import store, { getLoading, getQuery, getResult } from './Store/Store'
 
 function App() {
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <main>
+        <SearchBox />
+        <ResultBox />
+      </main>
   );
 }
 

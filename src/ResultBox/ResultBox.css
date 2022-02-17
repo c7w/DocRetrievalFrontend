@@ -1,0 +1,56 @@
+
+/* result display */
+
+#no-data {
+    display: flex;
+    width: 60vw;
+    height: 40vh;
+    /* background-color: red; */
+    margin: 5vh auto;
+    justify-content: center;
+    align-items: center;
+}
+
+#result-group {
+    display: flex;
+    flex-direction: column;
+    width: 60vw;
+    margin: 5vh auto 10vh;
+    justify-content: center;
+    align-items: center;
+}
+
+#result-cards {
+    padding: 2rem;
+}
+
+.result-card {
+    background-color: white;
+    padding: 2rem;
+    margin: 3rem auto;
+    border: black solid 1px;
+    border-radius: 10px;
+}
+
+.card-entry {
+    color: grey;
+    padding: 0.4rem;
+}
+
+.debate {
+    background-color: rgba(255, 0, 0, 0.2);
+}
+
+.fact {
+    background-color: rgba(0, 255, 0, 0.2);
+}
+
+.reason {background-color: rgba(0, 255, 255, 0.2);}
+
+.record {
+    background-color: rgba(255, 255, 0, 0.2);
+}
+
+.result {
+    background-color: rgba(0, 0, 255, 0.2);
+}
