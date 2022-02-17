@@ -1,19 +1,7 @@
-
-const updateResult = (data) => {
-    console.debug(data);
-    showMessage('');
-    document.getElementById("result-count").innerHTML = data.all;
-    document.getElementById("result-time").innerHTML = data.time;
-
-    const doc_list = data.documents;
-
-    const result_cards = document.getElementById("result-cards");
-
-    doc_list.forEach((doc) => {
-        console.debug(doc.document.content);
-    })
-
-}
+import {useDispatch} from "react-redux";
+import {BackendAddress} from "../Configuration";
+import {updateLoading, updateResult} from "../Store/Store";
+import moment from "moment";
 
 const showMessage = (message) => {
     const div1 = document.getElementById("no-data");
@@ -29,13 +17,37 @@ const showMessage = (message) => {
     }
 }
 
-const query = (query_params) => {
+const MakeQuery = (query_params, dispatcher) => {
+
+    console.debug(query_params);
+
     let result_string = "";
     for (const key in query_params) {
-        if(query_params[key]) result_string += key + '=' + query_params[key];
+        if(key === 'tstop' && query_params[key] === moment().format("YYYY-MM-DD")) {  continue; }
+        if(key === 'tstart' && query_params[key] === "2012-01-01") {  continue; }
+
+        if(query_params[key]) {result_string += key + '=' + query_params[key] + '&';}
+
     }
+    console.debug(result_string);
+
+    fetch(`${BackendAddress}?${result_string}`)
+        .then(res => res.json())
+        .then(
+            data => {
+                setTimeout(()=>{
+                    showMessage("");
+                    dispatcher(updateLoading(false));
+                    dispatcher(updateResult(JSON.stringify(data)));
+                }, 300)
+            }
+        ).catch((err) => {
+            console.debug(err);
+            dispatcher(updateLoading(false));
+            showMessage("Failed to Fetch Data.");
+    })
 
 }
 
 
-export {showMessage};
+export {showMessage, MakeQuery};

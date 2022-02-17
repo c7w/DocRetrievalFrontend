@@ -52,10 +52,18 @@
   border-width: 2px;
   border-color: black;
   border-style: solid;
-  width: 55vw;
+  width: 60vw;
   padding: 1rem;
 }
 
 .SearchItem {
   padding: 0.2rem;
+}
+
+.AdvancedSelect {
+  width: 240px;
+}
+
+.AdvancedInput {
+  width: 240px;
 }

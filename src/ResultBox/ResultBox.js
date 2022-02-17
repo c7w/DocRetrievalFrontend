@@ -3,7 +3,7 @@ import 'antd/dist/antd.css';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getLoading, getQuery, getResult } from '../Store/Store';
-import { showMessage } from "../utils/Utils";
+import {MakeQuery, showMessage} from "../utils/Utils";
 import { updateLoading, updateQuery, updateResult } from "../Store/Store";
 import './ResultBox.css';
 import {BackendAddress} from "../Configuration";
@@ -49,7 +49,7 @@ const ResultCard = (props) => {
           <tr><td className="card-entry">判决人</td><td colSpan="3">{judger}</td></tr>
           <tr><td className="card-entry" colSpan="4">法律依据</td></tr>
           <tr><td colSpan="4"><ul>
-            {data.case.article.filter((article)=>article !== '').map(
+            {data.case.article?.filter((article)=>article !== '').map(
               (article, ind)=><li style={{fontSize: '12px'}} key={ind}>{article}</li>
             )}
           </ul></td></tr>
@@ -80,45 +80,32 @@ const ResultBox = () => {
     }
 
     const pageSwitch = (page, pageSize) => {
-        if (loading) { return;}
+        if (loading) {
+            return;
+        }
 
         dispatcher(updateLoading(true));
         showMessage('Loading...');
 
-        console.debug(query);
         const currQuery = JSON.parse(query);
-        console.debug(page);
         currQuery.page = page;
 
         console.debug(currQuery);
 
         dispatcher(updateQuery(JSON.stringify(currQuery)));
 
-        fetch(`${BackendAddress}?q=${currQuery.query}&page=${currQuery.page}`)
-            .then(res => res.json())
-            .then(
-                data => {
-                    showMessage("");
+        MakeQuery(currQuery, dispatcher);
 
-                    dispatcher(updateLoading(false));
-                    dispatcher(updateResult(JSON.stringify(data)));
-                }
-            ).catch((err) => {
-                console.debug(err);
-                dispatcher(updateLoading(false));
-                showMessage("Failed to Fetch Data.");
-            })
-    };
-
+    }
 
     return (<div id="ResultBox">
           <div id="no-data"><span id="no-data-message" style={{color: 'grey', fontSize: '36px', fontWeight: 'bold'}}>No Data</span></div>
           <div id="result-group" style={{display: 'none'}}>
-            <p style={{textAlign: 'center'}}>共检索到 <span id="result-count">{data.all}</span> 条相关结果，用时 <span id="result-time">{data.time / 1000}</span>s</p>
+            <p style={{textAlign: 'center'}}>共检索到 <span id="result-count">{data.all >= 10000 ? ">10000" : data.all}</span> 条相关结果，用时 <span id="result-time">{data.time / 1000}</span>s</p>
             <div id="result-cards">
               {ResultCards}
             </div>
-            <Pagination onChange={pageSwitch} pageSize={10} total={data.all} showSizeChanger={false} style={{textAlign: 'center', margin: '0 auto 5vh'}}/>
+            <Pagination onChange={pageSwitch} pageSize={10} total={data.all > 1000 ? 1000 : data.all} showSizeChanger={false} style={{textAlign: 'center', margin: '0 auto 5vh'}}/>
           </div>
         </div>);
 };
