@@ -54,3 +54,20 @@
 .result {
     background-color: rgba(0, 0, 255, 0.2);
 }
+
+#china-map {
+    width: 600px;
+    height: 400px;
+    margin: 0 auto;
+}
+
+#pie-maps {
+    margin: 0 auto;
+    display: flex;
+}
+
+.pie-map {
+    width: 250px;
+    height: 250px;
+    margin: 0 auto;
+}

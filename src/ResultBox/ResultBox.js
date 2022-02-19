@@ -6,13 +6,13 @@ import { getLoading, getQuery, getResult } from '../Store/Store';
 import {MakeQuery, showMessage} from "../utils/Utils";
 import { updateLoading, updateQuery, updateResult } from "../Store/Store";
 import './ResultBox.css';
+import {myChart} from "../utils/Figure";
 import {BackendAddress} from "../Configuration";
 
 // props.document
 const ResultCard = (props) => {
   // console.debug(props.document);
   const data = JSON.parse(props.document);
-  console.debug(data);
 
 
   let judger = "";
@@ -47,6 +47,7 @@ const ResultCard = (props) => {
           </tr>
           <tr><td className="card-entry">当事人</td><td colSpan="3">{data.case.parties.join("、")}</td></tr>
           <tr><td className="card-entry">判决人</td><td colSpan="3">{judger}</td></tr>
+          <tr><td className="card-entry">关键词</td><td colSpan="3">{data.keywords.join('; ')}</td></tr>
           <tr><td className="card-entry" colSpan="4">法律依据</td></tr>
           <tr><td colSpan="4"><ul>
             {data.case.article?.filter((article)=>article !== '').map(
@@ -73,10 +74,17 @@ const ResultBox = () => {
     let data = {all: 10}
     let ResultCards = <></>;
 
+    // Here, DATA fetched back, update ResultCard List
     if (result !== '') { 
       data = JSON.parse(result);
+      console.debug(data);
+
+      // Update ResultCards
       const DataList = data.documents.map((doc, index)=> <ResultCard document={ JSON.stringify(doc) } key={index}/>);
       ResultCards = (DataList);
+
+      // Update Figures
+      myChart(data.figure);
     }
 
     const pageSwitch = (page, pageSize) => {
@@ -101,6 +109,14 @@ const ResultBox = () => {
     return (<div id="ResultBox">
           <div id="no-data"><span id="no-data-message" style={{color: 'grey', fontSize: '36px', fontWeight: 'bold'}}>No Data</span></div>
           <div id="result-group" style={{display: 'none'}}>
+              <div className={"Figures"}>
+                  <div id={"china-map"}/>
+                  <div id={"pie-maps"}>
+                      <div id={"program-map"} className={"pie-map"}/>
+                      <div id={"ctype-map"} className={"pie-map"}/>
+                      <div id={"court-map"} className={"pie-map"}/>
+                  </div>
+              </div>
             <p style={{textAlign: 'center'}}>共检索到 <span id="result-count">{data.all >= 10000 ? ">10000" : data.all}</span> 条相关结果，用时 <span id="result-time">{data.time / 1000}</span>s</p>
             <div id="result-cards">
               {ResultCards}
@@ -109,5 +125,7 @@ const ResultBox = () => {
           </div>
         </div>);
 };
+
+
 
 export default ResultBox;

@@ -2,6 +2,7 @@ import {useDispatch} from "react-redux";
 import {BackendAddress} from "../Configuration";
 import {updateLoading, updateResult} from "../Store/Store";
 import moment from "moment";
+import {KeywordList} from "./Constants";
 
 const showMessage = (message) => {
     const div1 = document.getElementById("no-data");
@@ -29,13 +30,22 @@ const MakeQuery = (query_params, dispatcher) => {
         if(query_params[key]) {result_string += key + '=' + query_params[key] + '&';}
 
     }
+    const QueryKeyword = [];
+    KeywordList.forEach((keyword) => { if(query_params.q?.indexOf(keyword) > -1) {QueryKeyword.push(keyword);} })
+    if(QueryKeyword.length > 0) {  result_string += 'keyword=' + QueryKeyword.join(';'); }
     console.debug(result_string);
+
 
     fetch(`${BackendAddress}?${result_string}`)
         .then(res => res.json())
         .then(
             data => {
                 setTimeout(()=>{
+
+                    data.documents = data.documents.map((doc)=>{
+                        return {...doc, keywords: KeywordList.filter((keyword)=> doc.document.content?.indexOf(keyword) > -1 )}
+                    })
+
                     showMessage("");
                     dispatcher(updateLoading(false));
                     dispatcher(updateResult(JSON.stringify(data)));
