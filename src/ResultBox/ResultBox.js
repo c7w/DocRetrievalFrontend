@@ -23,11 +23,61 @@ const ResultCard = (props) => {
 
   let content = data.document.content;
 
-  content = content.replace(data.case.fact, '<span class="fact" title="事实论据">' + data.case.fact + '</span>')
-                  .replace(data.case.debate, '<span class="debate" title="辩论焦点">' + data.case.debate + '</span>')
+  content = content.replace(data.case.debate, '<span class="debate" title="辩论焦点">' + data.case.debate + '</span>')
                   .replace(data.case.reason, '<span class="reason" title="判决理由">' + data.case.reason + '</span>')
                   .replace(data.case.record, '<span class="record" title="庭审记录">' + data.case.record + '</span>')
                   .replace(data.case.result, '<span class="result" title="判决结果">' + data.case.result + '</span>')
+
+    // console.debug(data.case.program in ['刑事一审', '刑事二审'])
+    if(data.case.type === '刑事案件' && ['刑事一审', '刑事二审'].includes(data.case.program)) {
+        const fact = data.case.fact;
+        const led = data.led;
+
+        let fact_string = '<span class="fact" title="事实论据">';
+
+        // Construct fact_string from led_data
+
+        let cursorLedIndex = 0;
+        let cursorLedPos = 0;
+
+        let char_index = 0;
+
+        while ( char_index < fact.length) { // TODO: empty result string???
+            if(cursorLedIndex >= led.length) break;
+            while( led[cursorLedIndex].tokens[cursorLedPos].indexOf("#") > -1 || led[cursorLedIndex].tokens[cursorLedPos].indexOf("[") > -1 ) {
+                cursorLedPos++;
+                if(cursorLedPos >= led[cursorLedIndex].tokens.length) { cursorLedIndex++; cursorLedPos = 0; }
+                if(cursorLedIndex >= led.length) break;
+                if(led[cursorLedIndex].tokens[cursorLedPos] === '[SEP]') { cursorLedIndex++; cursorLedPos = 0; }
+            }
+            if(cursorLedIndex >= led.length) break;
+
+            if( fact.indexOf(led[cursorLedIndex].tokens[cursorLedPos], char_index) === char_index ) {
+                if(led[cursorLedIndex].events[cursorLedPos] !== 'None') {
+                    fact_string += `<span class="fact-led" title="${led[cursorLedIndex].events[cursorLedPos]}">${ led[cursorLedIndex].tokens[cursorLedPos] }</span>`
+                } else {
+                    fact_string += led[cursorLedIndex].tokens[cursorLedPos];
+                }
+
+                char_index += led[cursorLedIndex].tokens[cursorLedPos].length;
+                cursorLedPos++;
+
+                if(cursorLedPos >= led[cursorLedIndex].tokens.length) { cursorLedIndex++; cursorLedPos = 0; }
+                if(cursorLedIndex >= led.length) break;
+                if(led[cursorLedIndex].tokens[cursorLedPos] === '[SEP]') { cursorLedIndex++; cursorLedPos = 0; }
+
+            } else {
+                char_index++;
+            }
+        }
+
+
+        fact_string += '</span>'
+
+        content = content.replace(data.case.fact, fact_string);
+    } else {
+        content = content.replace(data.case.fact, '<span class="fact" title="事实论据">' + data.case.fact + '</span>')
+    }
 
   return (
       <div className="result-card">

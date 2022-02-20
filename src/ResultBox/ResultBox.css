@@ -45,6 +45,11 @@
     background-color: rgba(0, 255, 0, 0.2);
 }
 
+.fact-led {
+    font-weight: bold;
+    background-color: rgba(0, 255, 0, 0.3);
+}
+
 .reason {background-color: rgba(0, 255, 255, 0.2);}
 
 .record {
