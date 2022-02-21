@@ -42,7 +42,7 @@ const ResultCard = (props) => {
 
         let char_index = 0;
 
-        while ( char_index < fact.length) { // TODO: empty result string???
+        while ( char_index < fact.length) {
             if(cursorLedIndex >= led.length) break;
             while( led[cursorLedIndex].tokens[cursorLedPos].indexOf("#") > -1 || led[cursorLedIndex].tokens[cursorLedPos].indexOf("[") > -1 ) {
                 cursorLedPos++;
