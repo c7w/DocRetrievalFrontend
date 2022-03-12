@@ -1,17 +1,18 @@
 import { useDispatch, useSelector } from "react-redux";
 import { getQuery, getLoading, getResult } from "../Store/Store";
-import {MakeQuery, showMessage} from "../utils/Utils";
+import {MakeQuery, showMessage, MakeQAQuery} from "../utils/Utils";
 import { updateLoading, updateQuery, updateResult } from "../Store/Store";
 import "./SearchBox.css";
 import {BackendAddress} from "../Configuration";
 import {DatePicker, Input, Select} from "antd";
 import {Option} from "antd/es/mentions";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {CaseProgramList, CaseTypeList, DocumentTypeList} from "../utils/Constants";
 import moment from "moment";
 
 const SearchBox = () => {
 
+    const [SearchOption, setSearchOption] = useState("doc");
     const query = useSelector(getQuery);
     const loading = useSelector(getLoading);
     const result = useSelector(getResult);
@@ -34,30 +35,41 @@ const SearchBox = () => {
 
     // Advanced Search Properties Ends
 
+
     const search = () => {
         if (loading) {
             return;
         }
 
         dispatcher(updateLoading(true));
-        showMessage('Loading...');
+        showMessage('Loading...', dispatcher);
 
-        const page = 1;
-        const query = {q, page, ctype, dtype, cprogram, cid, cname, dcourt, tstart: tstart.format("YYYY-MM-DD"), tstop: tstop.format("YYYY-MM-DD"), creason, cresult, carticle}
-        dispatcher(updateQuery(JSON.stringify(query)));
+        if(SearchOption == 'doc') {
+            const page = 1;
+            const query = {q, page, ctype, dtype, cprogram, cid, cname, dcourt, tstart: tstart.format("YYYY-MM-DD"), tstop: tstop.format("YYYY-MM-DD"), creason, cresult, carticle}
+            dispatcher(updateQuery(JSON.stringify(query)));
+            MakeQuery(query, dispatcher);
+        } else {
+            MakeQAQuery(q, dispatcher);
+        }
 
-        MakeQuery(query, dispatcher);
+
+
     };
 
     return (
         <div className="SearchBox">
-            <h2 id="web-name">面向文书结构化信息的检索平台</h2>
+            <h2 id="web-name">面向法律文书结构化信息的检索平台</h2>
             <div className="search-bar">
+                <Select defaultValue={"doc"} className={"OptionSelect"} onChange={setSearchOption}>
+                    <Select.Option value={"doc"} key={0}>搜文书</Select.Option>
+                    <Select.Option value={"qa"} key={1}>搜问答</Select.Option>
+                </Select>
                 <input id="in" placeholder="Search..." onChange={(e) => {setQ(e.target.value);}} />
                 <i className="fa fa-search" onClick={search}
                    style={{fontSize: '20px', marginRight: '1rem', cursor: 'pointer'}}></i>
             </div>
-            <div className={"Advanced"}>
+            <div className={"Advanced"} style={{display: SearchOption == 'doc' ? 'block' : 'none'}}>
                 <table width={"98%"}>
                     <tbody>
                     <tr>

@@ -1,21 +1,38 @@
 import {useDispatch} from "react-redux";
 import {BackendAddress} from "../Configuration";
-import {updateLoading, updateResult} from "../Store/Store";
+import {updateCurrent, updateLoading, updateQAResult, updateResult} from "../Store/Store";
 import moment from "moment";
 import {KeywordList} from "./Constants";
 
-const showMessage = (message) => {
+const showMessage = (message, dispatcher) => {
     const div1 = document.getElementById("no-data");
     const span = document.getElementById("no-data-message");
-    const div2 = document.getElementById("result-group");
     if (message !== "") {
+        dispatcher(updateCurrent('none'));
         div1.style.display = 'flex';
-        div2.style.display = 'none';
         span.innerText = message;
     } else {
-        div2.style.display = 'block';
         div1.style.display = 'none';
     }
+}
+
+const MakeQAQuery = (query_string, dispatcher) => {
+    fetch(`${BackendAddress}-qa/?query=${query_string}`)
+        .then(res => res.json())
+        .then(
+            data => {
+                setTimeout(()=>{
+                    dispatcher(updateCurrent("qa"));
+                    dispatcher(updateLoading(false));
+                    dispatcher(updateQAResult(JSON.stringify(data)));
+                    showMessage("", dispatcher);
+                }, 300)
+            }
+        ).catch((err) => {
+            console.debug(err);
+            dispatcher(updateLoading(false));
+            showMessage("Failed to Fetch Data.", dispatcher);
+    })
 }
 
 const MakeQuery = (query_params, dispatcher) => {
@@ -46,7 +63,8 @@ const MakeQuery = (query_params, dispatcher) => {
                         return {...doc, keywords: KeywordList.filter((keyword)=> doc.document.content?.indexOf(keyword) > -1 )}
                     })
 
-                    showMessage("");
+                    showMessage("", dispatcher);
+                    dispatcher(updateCurrent("doc"));
                     dispatcher(updateLoading(false));
                     dispatcher(updateResult(JSON.stringify(data)));
                 }, 300)
@@ -54,10 +72,10 @@ const MakeQuery = (query_params, dispatcher) => {
         ).catch((err) => {
             console.debug(err);
             dispatcher(updateLoading(false));
-            showMessage("Failed to Fetch Data.");
+            showMessage("Failed to Fetch Data.", dispatcher);
     })
 
 }
 
 
-export {showMessage, MakeQuery};
+export {showMessage, MakeQuery, MakeQAQuery};

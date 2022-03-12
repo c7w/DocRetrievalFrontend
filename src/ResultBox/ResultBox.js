@@ -2,7 +2,7 @@ import { Pagination } from 'antd';
 import 'antd/dist/antd.css';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getLoading, getQuery, getResult } from '../Store/Store';
+import {getCurrent, getLoading, getQAResult, getQuery, getResult} from '../Store/Store';
 import {MakeQuery, showMessage} from "../utils/Utils";
 import { updateLoading, updateQuery, updateResult } from "../Store/Store";
 import './ResultBox.css';
@@ -114,15 +114,31 @@ const ResultCard = (props) => {
   );
 };
 
+const ResultQACard = (props) => {
+    const data = JSON.parse(props.data);
+    return (
+        <div className="result-card">
+            <p>【Q】 {data.inquiry_title}</p>
+            {/*<p>【>】 {data.inquiry_description}</p>*/}
+            <p>【A】 {data.reply}</p>
+        </div>
+    );
+}
+
 const ResultBox = () => {
 
     const query = useSelector(getQuery);
     const loading = useSelector(getLoading);
     const result = useSelector(getResult);
+    const result_qa = useSelector(getQAResult);
+    const system = useSelector(getCurrent);
     const dispatcher = useDispatch();
 
     let data = {all: 10}
+    let data_qa = {all: 10}
+
     let ResultCards = <></>;
+    let ResultQACards = <></>;
 
     // Here, DATA fetched back, update ResultCard List
     if (result !== '') { 
@@ -137,13 +153,20 @@ const ResultBox = () => {
       myChart(data.figure);
     }
 
+    if (result_qa !== '') {
+        data_qa = JSON.parse(result_qa);
+        // Update ResultQACards
+        console.debug(data_qa);
+        ResultQACards = data_qa.documents.map((doc, index) => <ResultQACard data={JSON.stringify(doc._source)} key={index}/>)
+    }
+
     const pageSwitch = (page, pageSize) => {
         if (loading) {
             return;
         }
 
         dispatcher(updateLoading(true));
-        showMessage('Loading...');
+        showMessage('Loading...', dispatcher);
 
         const currQuery = JSON.parse(query);
         currQuery.page = page;
@@ -158,7 +181,7 @@ const ResultBox = () => {
 
     return (<div id="ResultBox">
           <div id="no-data"><span id="no-data-message" style={{color: 'grey', fontSize: '36px', fontWeight: 'bold'}}>No Data</span></div>
-          <div id="result-group" style={{display: 'none'}}>
+          <div id="result-group" style={{display: system === 'doc' ? 'block' : 'none'}}>
               <div className={"Figures"}>
                   <div id={"china-map"}/>
                   <div id={"pie-maps"}>
@@ -172,6 +195,12 @@ const ResultBox = () => {
               {ResultCards}
             </div>
             <Pagination onChange={pageSwitch} pageSize={10} total={data.all > 1000 ? 1000 : data.all} showSizeChanger={false} style={{textAlign: 'center', margin: '0 auto 5vh'}}/>
+          </div>
+          <div id={"result-qa-group"} style={{display: system === 'qa' ? 'block' : 'none'}} >
+              <p style={{textAlign: 'center'}}>共检索到 <span id="result-count">{data_qa.all}</span> 条相关结果，用时 <span id="result-time">{data_qa.time / 1000}</span>s</p>
+              <div id="result-cards">
+                  {ResultQACards}
+              </div>
           </div>
         </div>);
 };
